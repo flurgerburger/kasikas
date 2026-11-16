@@ -1,0 +1,48 @@
+:root {
+    --ink: #eadfcb;
+    --paper: #201a17;
+    --surface: #2b211b;
+    --lime: #c7a76b;
+    --coral: #a8614d;
+    --yellow: #bd8e4d;
+    --green: #526b59;
+    --line: rgba(234, 223, 203, .2);
+}
+* { 
+    box-sizing: border-box; 
+}
+html { 
+    scroll-behavior: smooth; 
+}
+body { 
+    margin: 0; 
+    background: var(--paper); 
+    color: var(--ink); 
+    font-family: 'Space Grotesk', sans-serif; 
+}
+a { color: inherit; text-decoration: none; }
+.site-header { display: flex; align-items: center; justify-content: space-between; padding: 28px 5vw; border-bottom: 1px solid var(--line); }
+.brand { display: flex; gap: 10px; align-items: center; font-size: 14px; font-weight: 700; letter-spacing: .16em; }
+.brand-mark { display: grid; place-items: center; width: 30px; height: 30px; background: var(--ink); color: var(--lime); font-size: 16px; letter-spacing: 0; }
+.site-nav { display: flex; align-items: center; gap: 28px; font-size: 13px; }
+.site-nav a, .text-button { transition: opacity .2s; }
+.site-nav a:hover, .text-button:hover { opacity: .6; }
+.nav-user, .mono { font-family: 'DM Mono', monospace; font-size: 11px; }
+.nav-cta, .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 14px; background: var(--ink); color: var(--paper); padding: 14px 18px; border: 0; font: inherit; font-size: 12px; cursor: pointer; }
+.text-button { background: none; padding: 0; border: 0; color: inherit; font: inherit; cursor: pointer; }
+main { min-height: calc(100vh - 145px); }
+.eyebrow { margin: 0 0 22px; font: 500 10px 'DM Mono', monospace; letter-spacing: .14em; }
+.auth-layout { display: grid; grid-template-columns: 1fr 440px; gap: 7vw; align-items: center; max-width: 1240px; margin: 0 auto; min-height: 690px; padding: 70px 5vw; }
+.auth-intro h1, .home-hero h1 { margin: 0; font-size: clamp(52px, 7vw, 104px); line-height: .93; letter-spacing: -.06em; font-weight: 600; }
+em { font-family: Georgia, serif; font-weight: 400; }
+.lede { max-width: 370px; margin: 30px 0 0; color: #b8aa95; font-size: 16px; line-height: 1.55; }
+.film-strip { display: flex; gap: 7px; margin-top: 90px; }
+.film-strip span { width: 52px; height: 70px; border-top: 5px solid var(--ink); border-bottom: 5px solid var(--ink); background: var(--coral); }
+.film-strip span:nth-child(2) { background: var(--lime); transform: translateY(14px); }.film-strip span:nth-child(3) { background: var(--yellow); }.film-strip span:nth-child(4) { background: var(--green); transform: translateY(14px); }.film-strip span:nth-child(5) { background: var(--coral); }
+.auth-panel { border-left: 1px solid var(--line); padding: 30px 0 30px 5vw; }
+.auth-panel h2 { font-size: 32px; letter-spacing: -.04em; margin: 0 0 13px; }.panel-copy { color: #b8aa95; font-size: 13px; line-height: 1.5; margin: 0 0 34px; max-width: 280px; }
+.auth-form { display: flex; flex-direction: column; gap: 9px; }.auth-form label { margin-top: 11px; font: 500 10px 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }.auth-form input { width: 100%; border: 1px solid var(--line); background: var(--surface); padding: 14px; font: inherit; color: var(--ink); outline: none; }.auth-form input:focus { border-color: var(--lime); box-shadow: 3px 3px 0 var(--lime); }.password-field-wrap { position: relative; display: flex; align-items: center; width: 100%; }.password-field-wrap input { padding-right: 46px; }.password-field-wrap input::-ms-reveal, .password-field-wrap input::-ms-clear { display: none; }.password-toggle-btn { position: absolute; right: 0; top: 0; bottom: 0; width: 44px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--ink); opacity: .6; cursor: pointer; padding: 0; transition: opacity .15s ease, color .15s ease; }.password-toggle-btn:hover { opacity: 1; color: var(--lime); }.password-toggle-btn:focus-visible { opacity: 1; color: var(--lime); outline: 2px solid var(--lime); outline-offset: -2px; }.password-toggle-btn .eye-icon { display: block; width: 18px; height: 18px; pointer-events: none; }.auth-form .primary-button { margin-top: 20px; width: 100%; }.form-footer { font-size: 12px; color: #b8aa95; margin-top: 24px; }.form-footer a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }.form-errors, .field-error { color: #e58a6d; font-size: 11px; line-height: 1.4; }.quote { margin-top: 100px; max-width: 300px; border-top: 1px solid var(--line); padding-top: 18px; font-family: Georgia, serif; font-size: 23px; line-height: 1.2; }.quote small { display: block; margin-top: 16px; font: 10px 'DM Mono', monospace; }
+.messages { position: fixed; z-index: 5; top: 90px; right: 5vw; padding: 13px 18px; background: var(--lime); color: var(--paper); font-size: 12px; box-shadow: 4px 4px 0 var(--ink); }.messages p { margin: 0; }
+.home-hero { display: grid; grid-template-columns: 1fr 1fr; min-height: 610px; border-bottom: 1px solid var(--line); }.hero-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 75px 8vw; }.hero-copy .lede { margin: 28px 0 32px; }.inline-button { display: inline-flex; }.hero-art { position: relative; overflow: hidden; background: #49382b; }.sun { position: absolute; top: 17%; right: 17%; width: 150px; height: 150px; border-radius: 50%; background: var(--yellow); }.mountain { position: absolute; bottom: -4%; width: 0; height: 0; border-left: 260px solid transparent; border-right: 260px solid transparent; border-bottom: 390px solid var(--green); }.mountain-back { left: -70px; border-bottom-color: #70533d; transform: scale(1.5); transform-origin: bottom; }.mountain-front { right: -40px; border-left-width: 330px; border-right-width: 330px; border-bottom-width: 430px; border-bottom-color: #30483a; }.hero-caption { position: absolute; bottom: 32px; left: 34px; color: var(--ink); font: 10px 'DM Mono', monospace; line-height: 1.8; }.hero-caption span { color: var(--lime); }.hero-caption strong { font: 18px 'Space Grotesk', sans-serif; }
+.section-block { padding: 90px 8vw 110px; }.section-heading { display: flex; justify-content: space-between; align-items: end; margin-bottom: 34px; }.section-heading h2 { font-size: 40px; letter-spacing: -.05em; margin: 0; }.arrow-link { font: 11px 'DM Mono', monospace; border-bottom: 1px solid var(--ink); padding-bottom: 6px; }.film-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }.film-card { position: relative; min-height: 300px; padding: 25px; overflow: hidden; }.film-card h3 { margin: 56px 0 16px; font-size: 31px; line-height: .96; letter-spacing: -.05em; }.film-card p { max-width: 170px; font-size: 12px; line-height: 1.5; }.card-coral { background: var(--coral); }.card-green { background: var(--green); color: var(--ink); }.card-yellow { background: var(--yellow); }.film-number, .film-meta { font: 10px 'DM Mono', monospace; }.film-meta { position: absolute; top: 26px; right: 25px; }.card-arrow { position: absolute; right: 25px; bottom: 20px; font-size: 22px; }.community-band { display: flex; align-items: baseline; justify-content: space-between; gap: 30px; padding: 72px 8vw; background: #120f0d; color: var(--ink); }.community-band h2 { margin: 0; font-size: clamp(38px, 5vw, 68px); line-height: .9; letter-spacing: -.06em; }.community-band p:last-child { max-width: 200px; margin: 0; color: #b8aa95; font-size: 13px; line-height: 1.5; }.site-footer { display: flex; justify-content: space-between; padding: 22px 5vw; border-top: 1px solid var(--line); color: #b8aa95; font-size: 11px; }
+@media (max-width: 760px) { .site-header { padding: 20px 6vw; }.site-nav { gap: 15px; }.site-nav > a:first-child, .nav-user { display: none; }.auth-layout { display: block; min-height: auto; padding: 65px 8vw; }.auth-intro h1 { font-size: 58px; }.film-strip { margin: 45px 0 55px; }.auth-panel { border-left: 0; border-top: 1px solid var(--line); padding: 42px 0 15px; }.quote { margin-top: 45px; }.home-hero { grid-template-columns: 1fr; }.hero-copy { min-height: 520px; padding: 65px 8vw; }.hero-art { min-height: 390px; }.section-block { padding: 65px 8vw 80px; }.section-heading h2 { font-size: 32px; }.film-grid { grid-template-columns: 1fr; }.film-card { min-height: 250px; }.community-band { display: block; padding: 60px 8vw; }.community-band p:last-child { margin-top: 30px; }.site-footer { display: block; line-height: 1.8; }.site-footer .mono { display: block; } }

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Join Kasikas{% endblock %}
+{% block content %}
+<section class="auth-layout register-layout">
+    <div class="auth-intro">
+        <p class="eyebrow">KASIKAS / COMMUNITY</p>
+        <h1>Keep local<br><em>stories moving.</em></h1>
+        <p class="lede">Join a growing audience for Cebu’s boldest independent films and micro-cinema screenings.</p>
+        <div class="quote">“Every story has a place. This is ours.”<small>— Kasikas community note</small></div>
+    </div>
+    <div class="auth-panel">
+        <p class="eyebrow">FIRST, A HELLO</p>
+        <h2>Create your account</h2>
+        <p class="panel-copy">Save films, follow screenings, and be part of the local picture.</p>
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+            <label for="id_username">Choose a username</label>
+            <input id="id_username" name="username" type="text" autocomplete="username" required autofocus>
+            {% if form.username.errors %}<div class="field-error">{{ form.username.errors|striptags }}</div>{% endif %}
+            <label for="id_password1">Password</label>
+            <div class="password-field-wrap">
+                <input id="id_password1" name="password1" type="password" autocomplete="new-password" required>
+                <button type="button" class="password-toggle-btn" data-target="id_password1" aria-label="Show password" aria-pressed="false" title="Show password">
+                    <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </button>
+            </div>
+            {% if form.password1.errors %}<div class="field-error">{{ form.password1.errors|striptags }}</div>{% endif %}
+            <label for="id_password2">Confirm password</label>
+            <div class="password-field-wrap">
+                <input id="id_password2" name="password2" type="password" autocomplete="new-password" required>
+                <button type="button" class="password-toggle-btn" data-target="id_password2" aria-label="Show password" aria-pressed="false" title="Show password">
+                    <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </button>
+            </div>
+            {% if form.password2.errors %}<div class="field-error">{{ form.password2.errors|striptags }}</div>{% endif %}
+            <button class="primary-button" type="submit">Create account <span>↗</span></button>
+        </form>
+        <p class="form-footer">Already a member? <a href="{% url 'login' %}">Sign in</a></p>
+    </div>
+</section>
+{% endblock %}

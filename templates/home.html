@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Discover | Kasikas{% endblock %}
+{% block content %}
+<section class="home-hero">
+    <div class="hero-copy">
+        <p class="eyebrow">NOW SCREENING / CEBU, PH</p>
+        <h1>See the<br><em>unseen.</em></h1>
+        <p class="lede">Independent films, student stories, and Visayan cinema made close to home.</p>
+        <a class="primary-button inline-button" href="#screenings">Explore screenings <span>↓</span></a>
+    </div>
+    <div class="hero-art" aria-label="Abstract film still artwork">
+        <div class="sun"></div>
+        <div class="mountain mountain-back"></div>
+        <div class="mountain mountain-front"></div>
+        <div class="hero-caption"><span>01</span> / FEATURED FILM<br><strong>Mga Dalan sa Gabii</strong></div>
+    </div>
+</section>
+<section class="section-block" id="screenings">
+    <div class="section-heading"><div><p class="eyebrow">CURATED FOR YOU</p><h2>On the local reel</h2></div><a class="arrow-link" href="#screenings" aria-label="View all screenings">View all ↗</a></div>
+    <div class="film-grid">
+        <article class="film-card card-coral"><div class="film-number">01</div><div class="film-meta">SHORT / 14 MIN</div><h3>Mga Dalan<br>sa Gabii</h3><p>A quiet walk through the city after the last jeepney.</p><span class="card-arrow">↗</span></article>
+        <article class="film-card card-green"><div class="film-number">02</div><div class="film-meta">THESIS / 22 MIN</div><h3>Asin<br>ug Hangin</h3><p>Three sisters return to the coast where they grew up.</p><span class="card-arrow">↗</span></article>
+        <article class="film-card card-yellow"><div class="film-number">03</div><div class="film-meta">DOCUMENTARY / 31 MIN</div><h3>Ang<br>Panaw</h3><p>Portraits of the people who keep Carbon Market awake.</p><span class="card-arrow">↗</span></article>
+    </div>
+</section>
+<section class="community-band"><p class="eyebrow">THE KASIKAS PROMISE</p><h2>Made here.<br><em>Seen here.</em></h2><p>Every ticket helps an independent filmmaker keep making the next story.</p></section>
+{% endblock %}
