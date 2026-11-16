@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}My Reel | Kasikas{% endblock %}
+{% block content %}
+<section class="tickets-container">
+    <div class="tickets-header">
+        <div>
+            <p class="eyebrow">DIGITAL TICKETING & ARCHIVE</p>
+            <h1 class="tickets-title">My Reel</h1>
+        </div>
+        <p class="lede">Your booked cinema passes and verified regional screenings in Cebu.</p>
+    </div>
+
+    <div class="ticket-list">
+        {% for ticket in tickets %}
+            <article class="cinema-pass-card">
+                <div class="pass-stub-left {{ ticket.film.card_theme }}">
+                    <div class="pass-brand-row">
+                        <span class="mono">KASIKAS CINEMA PASS</span>
+                        <span class="mono">PASS #{{ ticket.ticket_code|stringformat:"s"|slice:":8"|upper }}</span>
+                    </div>
+
+                    <div class="pass-content">
+                        <p class="eyebrow">{{ ticket.film.category_meta }}</p>
+                        <h2 class="pass-film-title">{{ ticket.film.title }}</h2>
+                        <p class="pass-director">Directed by {{ ticket.film.director }}</p>
+
+                        <div class="pass-meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-label mono">VENUE</span>
+                                <span class="meta-val">{{ ticket.film.screening_venue }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label mono">SCHEDULE</span>
+                                <span class="meta-val">{{ ticket.film.screening_time }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label mono">RESERVED SEATS</span>
+                                <span class="meta-val">{{ ticket.seats }} Pass{% if ticket.seats > 1 %}es{% endif %}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label mono">HOLDER</span>
+                                <span class="meta-val">{{ ticket.user.username }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pass-actions">
+                        <a href="{% url 'watch_film' ticket.film.id %}" class="pass-stream-link">
+                            Stream Online Version <span>▶</span>
+                        </a>
+                        <span class="status-pill mono">● VALID FOR ADMISSION</span>
+                    </div>
+                </div>
+
+                <div class="pass-stub-right">
+                    <div class="qr-container" id="qr-{{ ticket.id }}" data-code="KASIKAS-PASS:{{ ticket.ticket_code }}">
+                        <canvas class="fallback-qr-canvas" width="120" height="120" aria-label="QR Code"></canvas>
+                    </div>
+                    <span class="qr-label mono">SCAN AT DOOR</span>
+                    <span class="qr-token mono">{{ ticket.ticket_code|stringformat:"s"|slice:":13" }}...</span>
+                </div>
+            </article>
+        {% empty %}
+            <div class="empty-tickets-card">
+                <p class="eyebrow">YOUR REEL IS EMPTY</p>
+                <h2>No passes booked yet</h2>
+                <p class="panel-copy">You haven't reserved any cinema screening passes. Discover upcoming Visayan indie screenings and student thesis works on our local reel.</p>
+                <a href="{% url 'home' %}#screenings" class="primary-button inline-button">
+                    Explore Screenings <span>↓</span>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const qrWrappers = document.querySelectorAll('.qr-container');
+        qrWrappers.forEach(function (wrapper) {
+            const code = wrapper.getAttribute('data-code');
+            const fallbackCanvas = wrapper.querySelector('.fallback-qr-canvas');
+            
+            if (typeof QRCode !== 'undefined') {
+                if (fallbackCanvas) fallbackCanvas.remove();
+                new QRCode(wrapper, {
+                    text: code,
+                    width: 120,
+                    height: 120,
+                    colorDark: "#201a17",
+                    colorLight: "#eadfcb",
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            } else if (fallbackCanvas) {
+                // If CDN is unreachable, draw a stylized procedural matrix pattern
+                const ctx = fallbackCanvas.getContext('2d');
+                ctx.fillStyle = '#eadfcb';
+                ctx.fillRect(0, 0, 120, 120);
+                ctx.fillStyle = '#201a17';
+                ctx.fillRect(10, 10, 30, 30);
+                ctx.fillRect(80, 10, 30, 30);
+                ctx.fillRect(10, 80, 30, 30);
+                ctx.clearRect(16, 16, 18, 18);
+                ctx.clearRect(86, 16, 18, 18);
+                ctx.clearRect(16, 86, 18, 18);
+                ctx.fillRect(20, 20, 10, 10);
+                ctx.fillRect(90, 20, 10, 10);
+                ctx.fillRect(20, 90, 10, 10);
+                for (let i = 0; i < 40; i++) {
+                    const x = 45 + Math.floor(Math.sin(i * 12) * 20);
+                    const y = 45 + Math.floor(Math.cos(i * 7) * 20);
+                    ctx.fillRect(x, y, 4, 4);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

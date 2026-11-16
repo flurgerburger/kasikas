@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}{{ film.title }} | Kasikas{% endblock %}
+{% block content %}
+<section class="film-detail-container">
+    <div class="detail-nav-bar">
+        <a class="arrow-link" href="{% url 'home' %}">← Back to Discover</a>
+        <span class="mono">{{ film.category_meta }}</span>
+    </div>
+
+    <div class="detail-layout">
+        <div class="detail-main">
+            <p class="eyebrow">{{ film.institution|default:"CEBU INDEPENDENT CINEMA"|upper }}</p>
+            <h1 class="detail-title">{{ film.title }}</h1>
+            {% if film.native_title %}
+                <p class="detail-subtitle mono">{{ film.native_title }}</p>
+            {% endif %}
+            <p class="detail-director">Directed by <strong>{{ film.director }}</strong></p>
+
+            <div class="detail-block">
+                <h2 class="detail-heading">Synopsis</h2>
+                <div class="detail-prose">
+                    {{ film.synopsis|linebreaks }}
+                </div>
+            </div>
+
+            {% if film.cast_and_crew %}
+            <div class="detail-block">
+                <h2 class="detail-heading">Cast & Credits</h2>
+                <div class="credits-box mono">
+                    {{ film.cast_and_crew|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <aside class="detail-sidebar">
+            <div class="action-card screening-card {{ film.card_theme }}">
+                <p class="eyebrow">PHYSICAL SCREENING / CEBU</p>
+                <h3>{{ film.screening_venue }}</h3>
+                <p class="screening-time mono">🗓 {{ film.screening_time }}</p>
+                <div class="ticket-price-tag">
+                    <span class="price-amount">₱{{ film.ticket_price }}</span>
+                    <span class="price-note mono">per pass</span>
+                </div>
+
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'book_ticket' film.id %}" class="booking-form">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <label for="seats" class="mono">Number of Seats:</label>
+                            <select name="seats" id="seats" class="seats-select">
+                                <option value="1">1 Seat</option>
+                                <option value="2">2 Seats</option>
+                                <option value="3">3 Seats</option>
+                                <option value="4">4 Seats</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="primary-button full-width">
+                            Reserve Cinema Pass <span>↗</span>
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="auth-prompt-card">
+                        <p class="panel-copy">Sign in to reserve your physical screening pass.</p>
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="primary-button full-width">
+                            Sign in to Book <span>↗</span>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="action-card stream-card">
+                <p class="eyebrow">DIGITAL DISTRIBUTION</p>
+                <h4>Watch Online Stream</h4>
+                <p class="panel-copy">Access the digital release directly on Kasikas with subtitles.</p>
+                <a href="{% url 'watch_film' film.id %}" class="primary-button stream-button full-width">
+                    <span>▶</span> Stream Now ({{ film.runtime_minutes }} min)
+                </a>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Watching {{ film.title }} | Kasikas{% endblock %}
+{% block content %}
+<section class="watch-container">
+    <div class="watch-header">
+        <a class="arrow-link" href="{% url 'film_detail' film.id %}">← Back to film details</a>
+        <span class="mono now-playing-tag">● NOW STREAMING</span>
+    </div>
+
+    <div class="video-player-wrapper">
+        <video 
+            id="kasikas-player" 
+            controls 
+            autoplay 
+            playsinline 
+            preload="metadata" 
+            class="film-video-element"
+        >
+            <source src="{{ film.video_url }}" type="video/mp4">
+            <p>Your browser does not support HTML5 video streaming. You can download or view it <a href="{{ film.video_url }}" target="_blank" rel="noopener">here</a>.</p>
+        </video>
+    </div>
+
+    <div class="watch-meta-band">
+        <div class="watch-meta-info">
+            <p class="eyebrow">{{ film.category_meta }} • {{ film.institution|default:"VISAYAN CINEMA"|upper }}</p>
+            <h2>{{ film.title }}</h2>
+            <p class="watch-director">Directed by <strong>{{ film.director }}</strong></p>
+            <p class="watch-synopsis">{{ film.synopsis }}</p>
+        </div>
+
+        <div class="watch-support-card">
+            <p class="eyebrow">REGIONAL FILMMAKER SUPPORT</p>
+            <h4>Enjoying {{ film.director }}'s work?</h4>
+            <p class="panel-copy">Catch the in-person community screening at {{ film.screening_venue }} on {{ film.screening_time }}.</p>
+            <a href="{% url 'film_detail' film.id %}" class="primary-button inline-button">
+                Book Cinema Ticket <span>↗</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

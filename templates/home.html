@@ -12,16 +12,46 @@
         <div class="sun"></div>
         <div class="mountain mountain-back"></div>
         <div class="mountain mountain-front"></div>
-        <div class="hero-caption"><span>01</span> / FEATURED FILM<br><strong>Mga Dalan sa Gabii</strong></div>
+        {% if films %}
+            {% with first_film=films.0 %}
+                <div class="hero-caption"><span>01</span> / FEATURED FILM<br><strong>{{ first_film.title }}</strong></div>
+            {% endwith %}
+        {% else %}
+            <div class="hero-caption"><span>01</span> / FEATURED FILM<br><strong>Mga Dalan sa Gabii</strong></div>
+        {% endif %}
     </div>
 </section>
+
 <section class="section-block" id="screenings">
-    <div class="section-heading"><div><p class="eyebrow">CURATED FOR YOU</p><h2>On the local reel</h2></div><a class="arrow-link" href="#screenings" aria-label="View all screenings">View all ↗</a></div>
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">CURATED FOR YOU</p>
+            <h2>On the local reel</h2>
+        </div>
+        <span class="mono">{{ films|length }} local works</span>
+    </div>
     <div class="film-grid">
-        <article class="film-card card-coral"><div class="film-number">01</div><div class="film-meta">SHORT / 14 MIN</div><h3>Mga Dalan<br>sa Gabii</h3><p>A quiet walk through the city after the last jeepney.</p><span class="card-arrow">↗</span></article>
-        <article class="film-card card-green"><div class="film-number">02</div><div class="film-meta">THESIS / 22 MIN</div><h3>Asin<br>ug Hangin</h3><p>Three sisters return to the coast where they grew up.</p><span class="card-arrow">↗</span></article>
-        <article class="film-card card-yellow"><div class="film-number">03</div><div class="film-meta">DOCUMENTARY / 31 MIN</div><h3>Ang<br>Panaw</h3><p>Portraits of the people who keep Carbon Market awake.</p><span class="card-arrow">↗</span></article>
+        {% for film in films %}
+            <a href="{% url 'film_detail' film.id %}" class="film-card {{ film.card_theme }}" aria-label="View {{ film.title }}">
+                <div class="film-number">0{{ forloop.counter }}</div>
+                <div class="film-meta">{{ film.category_meta }}</div>
+                <h3>{{ film.title }}</h3>
+                <p>{{ film.logline }}</p>
+                <span class="card-arrow" aria-hidden="true">↗</span>
+            </a>
+        {% empty %}
+            <div class="empty-state-block">
+                <p class="eyebrow">STATUS</p>
+                <h3>No films on reel yet</h3>
+                <p class="panel-copy">New student thesis projects and indie short films from Cebu will be scheduled soon.</p>
+            </div>
+        {% endfor %}
     </div>
 </section>
-<section class="community-band"><p class="eyebrow">THE KASIKAS PROMISE</p><h2>Made here.<br><em>Seen here.</em></h2><p>Every ticket helps an independent filmmaker keep making the next story.</p></section>
+
+<section class="community-band">
+    <p class="eyebrow">THE KASIKAS PROMISE</p>
+    <h2>Made here.<br><em>Seen here.</em></h2>
+    <p>Every ticket helps an independent filmmaker keep making the next story.</p>
+</section>
 {% endblock %}
