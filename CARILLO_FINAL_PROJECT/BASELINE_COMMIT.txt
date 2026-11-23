@@ -1,1 +1,1 @@
-2a0ea092f9496aaaef0527e11ed832dbeb332ef2 | flurgerburger | 2026-11-16 16:42:11 +0800 | test(accounts): add test suite for auth views and UI toggles
+ab725e5e460b99821b3a992f57ddb23f2fe0af7f | flurgerburger | 2026-11-23 16:12:52 +0800 | chore(pre-session): preserve baseline evidence and pre-session state
