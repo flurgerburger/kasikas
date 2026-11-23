@@ -1,0 +1,17 @@
+ CARILLO_FINAL_PROJECT/BASELINE_COMMIT.txt  |   1 +
+ accounts/admin.py                          |  15 +++-
+ accounts/management/__init__.py            |   0
+ accounts/management/commands/__init__.py   |   0
+ accounts/management/commands/seed_films.py | 104 +++++++++++++++++++++++++
+ accounts/migrations/0001_initial.py        |  57 ++++++++++++++
+ accounts/models.py                         |  62 ++++++++++++++-
+ accounts/tests.py                          |  75 ++++++++++++++++++
+ accounts/urls.py                           |   6 +-
+ accounts/views.py                          |  68 ++++++++++++----
+ static/css/kasikas.css                     |  91 ++++++++++++++++++++++
+ templates/base.html                        |   7 +-
+ templates/film_detail.html                 |  83 ++++++++++++++++++++
+ templates/home.html                        |  42 ++++++++--
+ templates/my_tickets.html                  | 120 +++++++++++++++++++++++++++++
+ templates/watch.html                       |  42 ++++++++++
+ 16 files changed, 747 insertions(+), 26 deletions(-)

@@ -1,0 +1,6 @@
+71ef086 | flurgerburger | 2026-11-16 17:00:15 +0800 | feat(platform): implement dynamic catalog, film detail, video player, and ticketing flow
+aa2b75c | flurgerburger | 2026-11-16 16:52:26 +0800 | feat(models): add Film and Ticket models with initial migrations
+2a0ea09 | flurgerburger | 2026-11-16 16:42:11 +0800 | test(accounts): add test suite for auth views and UI toggles
+d3d260c | flurgerburger | 2026-11-16 16:42:00 +0800 | feat(ui): add cinema platform templates, styles, and password toggle interaction
+0278290 | flurgerburger | 2026-11-16 16:41:49 +0800 | feat(accounts): implement authentication views and routes
+0cae26a | flurgerburger | 2026-11-16 16:41:36 +0800 | chore: initialize Django project configuration and dependencies

@@ -1,0 +1,12 @@
+diff --git a/accounts/management/__init__.py b/accounts/management/__init__.py
+index e69de29..8b13789 100644
+--- a/accounts/management/__init__.py
++++ b/accounts/management/__init__.py
+@@ -0,0 +1 @@
++
+diff --git a/accounts/management/commands/__init__.py b/accounts/management/commands/__init__.py
+index e69de29..8b13789 100644
+--- a/accounts/management/commands/__init__.py
++++ b/accounts/management/commands/__init__.py
+@@ -0,0 +1 @@
++
