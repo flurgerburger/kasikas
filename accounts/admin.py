@@ -1,11 +1,18 @@
 from django.contrib import admin
-from .models import Film, Ticket
+from .models import Film, Ticket, UserProfile
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role', 'studio_name', 'created_at')
+    list_filter = ('role',)
+    search_fields = ('user__username', 'user__email', 'studio_name')
 
 
 @admin.register(Film)
 class FilmAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'native_title', 'director', 'category', 'runtime_minutes', 'screening_venue', 'ticket_price')
-    list_filter = ('category', 'card_theme')
+    list_display = ('id', 'title', 'director', 'creator', 'category', 'status', 'views_count', 'ticket_price')
+    list_filter = ('category', 'card_theme', 'status')
     search_fields = ('title', 'native_title', 'director', 'institution', 'synopsis')
 
 
