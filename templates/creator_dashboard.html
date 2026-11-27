@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% block title %}Creator Studio | Kasikas{% endblock %}
+{% block content %}
+<section class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <p class="eyebrow">KASIKAS / CREATOR STUDIO</p>
+            <h1 class="dashboard-title">Your films,<br><em>your audience.</em></h1>
+        </div>
+        <div class="dashboard-header-actions">
+            <a href="{% url 'home' %}" class="secondary-button">Browse Viewer Catalog ↗</a>
+            <a href="#upload-film" class="primary-button">Upload Short Movie ↓</a>
+        </div>
+    </div>
+
+    <!-- Creator KPI Summary -->
+    <div class="kpi-grid">
+        <div class="kpi-card kpi-highlight">
+            <span class="kpi-label mono">TOTAL TICKET REVENUE</span>
+            <strong class="kpi-value">₱{{ total_revenue|floatformat:2 }}</strong>
+            <span class="kpi-sub mono">{{ total_tickets_sold }} passes sold</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label mono">TOTAL WATCHES</span>
+            <strong class="kpi-value">{{ total_views }}</strong>
+            <span class="kpi-sub mono">Across all releases</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label mono">MY RELEASES</span>
+            <strong class="kpi-value">{{ my_films|length }}</strong>
+            <span class="kpi-sub mono">{{ published_count }} Published · {{ draft_count }} Draft</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label mono">PAYOUT STATUS</span>
+            <strong class="kpi-value kpi-status-text">{{ payout_status }}</strong>
+            <span class="kpi-sub mono">{{ payout_note }}</span>
+        </div>
+    </div>
+
+    <!-- Monetization & Earnings Breakdown -->
+    <section class="dashboard-section" id="monetization">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">MONETIZATION &amp; PAYOUTS</p>
+                <h2>Ticket Earnings Overview</h2>
+            </div>
+            <span class="status-badge mono">{{ payout_status|upper }}</span>
+        </div>
+
+        <div class="analytics-two-col">
+            <div class="panel-card">
+                <div class="panel-card-header">
+                    <span class="eyebrow">EARNINGS OVER TIME (6 MONTHS)</span>
+                    <span class="mono panel-meta">PHP (₱)</span>
+                </div>
+                <div class="bar-chart" role="img" aria-label="Monthly ticket revenue bar chart">
+                    {% for point in earnings_series %}
+                        <div class="bar-col">
+                            <span class="bar-val mono">₱{{ point.revenue|floatformat:0 }}</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="height: {{ point.pct }}%;" title="{{ point.label }}: ₱{{ point.revenue|floatformat:2 }} ({{ point.tickets }} tickets)"></div>
+                            </div>
+                            <span class="bar-label mono">{{ point.label }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-card-header">
+                    <span class="eyebrow">REVENUE PER SHORT MOVIE</span>
+                    <span class="mono panel-meta">{{ total_tickets_sold }} TOTAL PASSES</span>
+                </div>
+                {% if my_films %}
+                    <div class="mini-table-wrap">
+                        <table class="data-table compact-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Price</th>
+                                    <th>Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for film in my_films %}
+                                    <tr>
+                                        <td><strong>{{ film.title }}</strong></td>
+                                        <td class="mono">₱{{ film.ticket_price }}</td>
+                                        <td class="mono">{{ film.tickets_sold }}</td>
+                                        <td class="mono accent-text">₱{{ film.revenue|floatformat:2 }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="panel-copy">Upload a short movie below to start tracking ticket sales per release.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- My Releases -->
+    <section class="dashboard-section" id="my-releases">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">CATALOG MANAGEMENT</p>
+                <h2>My Releases</h2>
+            </div>
+            <span class="mono">{{ my_films|length }} film{{ my_films|length|pluralize }}</span>
+        </div>
+
+        {% if my_films %}
+            <div class="releases-grid">
+                {% for film in my_films %}
+                    <article class="release-card">
+                        <div class="release-card-top {{ film.card_theme }}">
+                            {% if film.thumbnail_src %}
+                                <img src="{{ film.thumbnail_src }}" alt="{{ film.title }} poster" class="release-thumb">
+                            {% endif %}
+                            <div class="release-badges">
+                                <span class="mono release-cat">{{ film.category_meta }}</span>
+                                <span class="status-pill-badge mono {% if film.status == 'PUBLISHED' %}is-published{% else %}is-draft{% endif %}">
+                                    {{ film.get_status_display|upper }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="release-card-body">
+                            <h3>{{ film.title }}</h3>
+                            <p class="release-logline">{{ film.logline }}</p>
+
+                            <div class="release-metrics mono">
+                                <div>
+                                    <span class="metric-k">VIEWS</span>
+                                    <span class="metric-v">{{ film.views_count }}</span>
+                                </div>
+                                <div>
+                                    <span class="metric-k">TICKETS</span>
+                                    <span class="metric-v">{{ film.tickets_sold }}</span>
+                                </div>
+                                <div>
+                                    <span class="metric-k">REVENUE</span>
+                                    <span class="metric-v accent-text">₱{{ film.revenue|floatformat:0 }}</span>
+                                </div>
+                            </div>
+
+                            <div class="release-actions">
+                                <a href="{% url 'film_detail' film.id %}" class="mini-link mono">Details ↗</a>
+                                <a href="{% url 'watch_film' film.id %}" class="mini-link mono">Stream ▶</a>
+                                <form method="post" action="{% url 'toggle_film_status' film.id %}" class="inline-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="mini-btn mono">
+                                        {% if film.status == 'PUBLISHED' %}Unpublish{% else %}Publish{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-block">
+                <p class="eyebrow">NO RELEASES YET</p>
+                <h3>Share your first Cebuano short film</h3>
+                <p class="panel-copy">Use the uploader below to submit your film, set a ticket price, and publish to Kasikas.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- Short Movie Uploader -->
+    <section class="dashboard-section" id="upload-film">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">NEW SUBMISSION</p>
+                <h2>Short Movie Uploader</h2>
+            </div>
+            <span class="mono">MP4 / WEBM · MAX 4K</span>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="upload-form-card">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="form-grid-two">
+                <div class="form-field">
+                    <label for="{{ form.title.id_for_label }}">Film Title *</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<div class="field-error">{{ form.title.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.native_title.id_for_label }}">Native / Visayan Title</label>
+                    {{ form.native_title }}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.director.id_for_label }}">Director *</label>
+                    {{ form.director }}
+                    {% if form.director.errors %}<div class="field-error">{{ form.director.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.institution.id_for_label }}">School / Collective</label>
+                    {{ form.institution }}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.category.id_for_label }}">Genre / Category *</label>
+                    {{ form.category }}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.runtime_minutes.id_for_label }}">Runtime (Minutes) *</label>
+                    {{ form.runtime_minutes }}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.ticket_price.id_for_label }}">Ticket Price (₱) *</label>
+                    {{ form.ticket_price }}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.status.id_for_label }}">Release Status *</label>
+                    {{ form.status }}
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.logline.id_for_label }}">Short Pitch / Logline *</label>
+                {{ form.logline }}
+                {% if form.logline.errors %}<div class="field-error">{{ form.logline.errors|striptags }}</div>{% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.synopsis.id_for_label }}">Synopsis / Description *</label>
+                {{ form.synopsis }}
+                {% if form.synopsis.errors %}<div class="field-error">{{ form.synopsis.errors|striptags }}</div>{% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.director_note.id_for_label }}">Director's Note / Creative Background</label>
+                {{ form.director_note }}
+            </div>
+
+            <div class="form-grid-two">
+                <div class="form-field">
+                    <label for="{{ form.video_file.id_for_label }}">Upload Video File (MP4 / MOV / WebM)</label>
+                    <div class="file-drop-box">
+                        {{ form.video_file }}
+                        <span class="mono file-hint" id="video-file-hint">Select local video file or leave blank to use stream URL</span>
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.thumbnail_file.id_for_label }}">Upload Thumbnail / Poster (JPG / PNG)</label>
+                    <div class="file-drop-box">
+                        {{ form.thumbnail_file }}
+                        <span class="mono file-hint" id="thumb-file-hint">Recommended 16:9 or 4:5 poster artwork</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid-three">
+                <div class="form-field">
+                    <label for="{{ form.video_url.id_for_label }}">Stream URL (Fallback)</label>
+                    {{ form.video_url }}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.screening_venue.id_for_label }}">Screening Venue</label>
+                    {{ form.screening_venue }}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.card_theme.id_for_label }}">Card Accent</label>
+                    {{ form.card_theme }}
+                </div>
+            </div>
+
+            <div class="form-grid-two">
+                <div class="form-field">
+                    <label for="{{ form.screening_time.id_for_label }}">Screening Schedule</label>
+                    {{ form.screening_time }}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.cast_and_crew.id_for_label }}">Cast &amp; Crew Credits</label>
+                    {{ form.cast_and_crew }}
+                </div>
+            </div>
+
+            <div class="upload-submit-row">
+                <button type="submit" class="primary-button">Submit Short Movie <span>↗</span></button>
+            </div>
+        </form>
+    </section>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const videoInput = document.getElementById('id_video_file');
+    const thumbInput = document.getElementById('id_thumbnail_file');
+    if (videoInput) {
+        videoInput.addEventListener('change', () => {
+            const hint = document.getElementById('video-file-hint');
+            if (hint && videoInput.files.length) {
+                hint.textContent = 'Selected: ' + videoInput.files[0].name;
+            }
+        });
+    }
+    if (thumbInput) {
+        thumbInput.addEventListener('change', () => {
+            const hint = document.getElementById('thumb-file-hint');
+            if (hint && thumbInput.files.length) {
+                hint.textContent = 'Selected: ' + thumbInput.files[0].name;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% block title %}Admin Analytics | Kasikas{% endblock %}
+{% block content %}
+<section class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <p class="eyebrow">KASIKAS / PLATFORM ADMIN CONSOLE</p>
+            <h1 class="dashboard-title">Platform<br><em>oversight.</em></h1>
+        </div>
+        <div class="dashboard-header-actions">
+            <a href="{% url 'home' %}" class="secondary-button">View Public Catalog ↗</a>
+            <a href="/admin/" class="secondary-button">Django DB Admin ↗</a>
+        </div>
+    </div>
+
+    <!-- Platform Overview Metrics -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <span class="kpi-label mono">TOTAL MOVIE RELEASES</span>
+            <strong class="kpi-value">{{ total_releases }}</strong>
+            <span class="kpi-sub mono">{{ total_all_films }} total submissions</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label mono">TOTAL PLATFORM VIEWS</span>
+            <strong class="kpi-value">{{ total_views }}</strong>
+            <span class="kpi-sub mono">Cumulative streams</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label mono">ACTIVE CREATORS</span>
+            <strong class="kpi-value">{{ total_active_creators }}</strong>
+            <span class="kpi-sub mono">Registered filmmakers</span>
+        </div>
+        <div class="kpi-card kpi-highlight">
+            <span class="kpi-label mono">OVERALL TICKET REVENUE</span>
+            <strong class="kpi-value">₱{{ overall_revenue|floatformat:2 }}</strong>
+            <span class="kpi-sub mono">{{ total_tickets_sold }} passes issued</span>
+        </div>
+    </div>
+
+    <!-- Visual Analytics -->
+    <section class="dashboard-section">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">VISUAL ANALYTICS</p>
+                <h2>Watch Trends &amp; Top Releases</h2>
+            </div>
+            <span class="mono">LIVE PLATFORM TELEMETRY</span>
+        </div>
+
+        <div class="analytics-three-col">
+            <!-- Watch Trends Chart -->
+            <div class="panel-card">
+                <div class="panel-card-header">
+                    <span class="eyebrow">PLATFORM WATCH TRENDS</span>
+                    <span class="mono panel-meta">6 MONTHS</span>
+                </div>
+                <div class="bar-chart" role="img" aria-label="Platform watch trends over time">
+                    {% for point in trend_series %}
+                        <div class="bar-col">
+                            <span class="bar-val mono">{{ point.watches }}</span>
+                            <div class="bar-track">
+                                <div class="bar-fill bar-coral" style="height: {{ point.watches_pct }}%;" title="{{ point.label }}: {{ point.watches }} watches"></div>
+                            </div>
+                            <span class="bar-label mono">{{ point.label }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Top-Performing Releases -->
+            <div class="panel-card">
+                <div class="panel-card-header">
+                    <span class="eyebrow">TOP-PERFORMING RELEASES</span>
+                    <span class="mono panel-meta">BY VIEWS</span>
+                </div>
+                <div class="horiz-chart">
+                    {% for film in top_releases %}
+                        <div class="horiz-row">
+                            <div class="horiz-meta">
+                                <span class="horiz-title">{{ film.title }}</span>
+                                <span class="mono horiz-val">{{ film.views_count }} views · {{ film.tickets_sold }} tix</span>
+                            </div>
+                            <div class="horiz-track">
+                                <div class="horiz-fill" style="width: {{ film.views_pct }}%;"></div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="panel-copy">No film performance data available yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Release Volume & Genre Mix -->
+            <div class="panel-card">
+                <div class="panel-card-header">
+                    <span class="eyebrow">RELEASE VOLUME OVER TIME</span>
+                    <span class="mono panel-meta">BY MONTH &amp; GENRE</span>
+                </div>
+                <div class="bar-chart compact-chart" role="img" aria-label="Release volume over time">
+                    {% for point in trend_series %}
+                        <div class="bar-col">
+                            <span class="bar-val mono">{{ point.releases }}</span>
+                            <div class="bar-track">
+                                <div class="bar-fill bar-green" style="height: {{ point.releases_pct }}%;" title="{{ point.label }}: {{ point.releases }} releases"></div>
+                            </div>
+                            <span class="bar-label mono">{{ point.label }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="genre-breakdown">
+                    {% for cat in category_counts %}
+                        <div class="genre-chip mono">
+                            <span>{{ cat.label }}</span>
+                            <strong>{{ cat.count }}</strong>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Movie Performance Table -->
+    <section class="dashboard-section">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">ALL RELEASES</p>
+                <h2>Movie Performance Table</h2>
+            </div>
+            <div class="table-controls">
+                <input
+                    type="search"
+                    id="admin-film-search"
+                    class="table-search-input"
+                    placeholder="Search title, creator, genre..."
+                    aria-label="Search movies"
+                >
+            </div>
+        </div>
+
+        <div class="panel-card table-panel">
+            <div class="table-scroll">
+                <table class="data-table" id="admin-performance-table">
+                    <thead>
+                        <tr>
+                            <th><button type="button" class="sort-btn mono" data-sort="title" data-type="str">Movie Title ↕</button></th>
+                            <th><button type="button" class="sort-btn mono" data-sort="creator" data-type="str">Creator ↕</button></th>
+                            <th><button type="button" class="sort-btn mono" data-sort="date" data-type="str">Release Date ↕</button></th>
+                            <th><button type="button" class="sort-btn mono" data-sort="views" data-type="num">Watch Count ↕</button></th>
+                            <th><button type="button" class="sort-btn mono" data-sort="tickets" data-type="num">Ticket Sales ↕</button></th>
+                            <th><button type="button" class="sort-btn mono" data-sort="revenue" data-type="num">Revenue ↕</button></th>
+                            <th><span class="mono">Status</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for film in films_table %}
+                            <tr
+                                data-title="{{ film.title|lower }}"
+                                data-creator="{{ film.creator_label|lower }} {{ film.director|lower }}"
+                                data-genre="{{ film.get_category_display|lower }}"
+                                data-date="{{ film.created_at|date:'Y-m-d' }}"
+                                data-views="{{ film.views_count }}"
+                                data-tickets="{{ film.tickets_sold }}"
+                                data-revenue="{{ film.revenue|floatformat:2 }}"
+                            >
+                                <td>
+                                    <a href="{% url 'film_detail' film.id %}" class="table-film-link">
+                                        <strong>{{ film.title }}</strong>
+                                        <span class="mono table-sub">{{ film.get_category_display }} · {{ film.runtime_minutes }}m</span>
+                                    </a>
+                                </td>
+                                <td>
+                                    <span>{{ film.director }}</span>
+                                    <span class="mono table-sub">@{{ film.creator_label }}</span>
+                                </td>
+                                <td class="mono">{{ film.created_at|date:"M d, Y" }}</td>
+                                <td class="mono">{{ film.views_count }}</td>
+                                <td class="mono">{{ film.tickets_sold }}</td>
+                                <td class="mono accent-text">₱{{ film.revenue|floatformat:2 }}</td>
+                                <td>
+                                    <span class="status-pill-badge mono {% if film.status == 'PUBLISHED' %}is-published{% else %}is-draft{% endif %}">
+                                        {{ film.get_status_display|upper }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="empty-table-cell">No movies found in catalog.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('admin-film-search');
+    const table = document.getElementById('admin-performance-table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.trim().toLowerCase();
+            const rows = Array.from(tbody.querySelectorAll('tr[data-title]'));
+            rows.forEach((row) => {
+                const hay = [
+                    row.dataset.title || '',
+                    row.dataset.creator || '',
+                    row.dataset.genre || '',
+                ].join(' ');
+                row.style.display = hay.includes(q) ? '' : 'none';
+            });
+        });
+    }
+
+    const sortButtons = table.querySelectorAll('.sort-btn');
+    let currentSort = { key: null, asc: true };
+
+    sortButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const key = btn.dataset.sort;
+            const type = btn.dataset.type;
+            const asc = currentSort.key === key ? !currentSort.asc : false;
+            currentSort = { key, asc };
+
+            const rows = Array.from(tbody.querySelectorAll('tr[data-title]'));
+            rows.sort((a, b) => {
+                const av = a.dataset[key] || '';
+                const bv = b.dataset[key] || '';
+                if (type === 'num') {
+                    return asc ? parseFloat(av) - parseFloat(bv) : parseFloat(bv) - parseFloat(av);
+                }
+                return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+            });
+            rows.forEach((r) => tbody.appendChild(r));
+        });
+    });
+});
+</script>
+{% endblock %}
