@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Discover | Kasikas{% endblock %}
 {% block content %}
 <section class="home-hero">
@@ -22,30 +23,89 @@
     </div>
 </section>
 
-<section class="section-block" id="screenings">
+{# ── SUBQUERY RESULT: films this user has a ticket for ─────────────────── #}
+{% if user.is_authenticated and booked_films %}
+<section class="section-block booked-section">
     <div class="section-heading">
+        <div>
+            <p class="eyebrow">YOUR REEL</p>
+            <h2>Screenings you've booked</h2>
+        </div>
+        <a href="{% url 'my_tickets' %}" class="mono booked-view-all">View passes →</a>
+    </div>
+    <div class="booked-strip">
+        {% for film in booked_films %}
+            <a href="{% url 'film_detail' film.id %}" class="booked-pill {{ film.card_theme }}">
+                <span class="booked-check" aria-hidden="true">✓</span>
+                <span class="booked-pill-title">{{ film.title }}</span>
+                <span class="mono booked-pill-meta">{{ film.category_meta }}</span>
+            </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{# ──────────────────────────────────────────────────────────────────────── #}
+
+<section class="section-block reel-section" id="screenings">
+    <div class="section-heading reel-heading">
         <div>
             <p class="eyebrow">CURATED FOR YOU</p>
             <h2>On the local reel</h2>
         </div>
-        <span class="mono">{{ films|length }} local works</span>
+        <div class="reel-controls-wrap">
+            <span class="mono reel-count">{{ films|length }} local works</span>
+            {% if films %}
+                <div class="reel-nav-buttons" role="group" aria-label="Reel navigation">
+                    <button
+                        type="button"
+                        class="reel-nav-btn"
+                        id="reel-prev-btn"
+                        aria-label="Scroll left to previous films"
+                    >
+                        <span aria-hidden="true">&#8249;</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="reel-nav-btn"
+                        id="reel-next-btn"
+                        aria-label="Scroll right to next films"
+                    >
+                        <span aria-hidden="true">&#8250;</span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
     </div>
-    <div class="film-grid">
-        {% for film in films %}
-            <a href="{% url 'film_detail' film.id %}" class="film-card {{ film.card_theme }}" aria-label="View {{ film.title }}">
-                <div class="film-number">0{{ forloop.counter }}</div>
-                <div class="film-meta">{{ film.category_meta }}</div>
-                <h3>{{ film.title }}</h3>
-                <p>{{ film.logline }}</p>
-                <span class="card-arrow" aria-hidden="true">↗</span>
-            </a>
-        {% empty %}
-            <div class="empty-state-block">
-                <p class="eyebrow">STATUS</p>
-                <h3>No films on reel yet</h3>
-                <p class="panel-copy">New student thesis projects and indie short films from Cebu will be scheduled soon.</p>
-            </div>
-        {% endfor %}
+
+    <div class="reel-carousel-shell" role="region" aria-label="On the local reel" tabindex="0">
+        <div class="reel-carousel-track" id="reel-carousel-track">
+            {% for film in films %}
+                <a href="{% url 'film_detail' film.id %}" class="film-card reel-card {{ film.card_theme }}" aria-label="View {{ film.title }}">
+                    <div class="film-card-frame">
+                        {% if film.thumbnail_src %}
+                            <img src="{{ film.thumbnail_src }}" alt="{{ film.title }} still" class="film-card-thumb" loading="lazy">
+                        {% endif %}
+                        <div class="film-card-top-bar">
+                            <span class="film-number">{{ forloop.counter|stringformat:"02d" }}</span>
+                            <span class="film-theme-tag mono">{{ film.theme_meta.tag }}</span>
+                        </div>
+                        <div class="film-meta">{{ film.category_meta }}</div>
+                    </div>
+                    <div class="film-card-body">
+                        <h3>{{ film.title }}</h3>
+                        <p class="film-card-director mono">Dir. {{ film.director }}</p>
+                        <p class="film-card-logline">{{ film.logline }}</p>
+                    </div>
+                    <span class="card-arrow" aria-hidden="true">↗</span>
+                </a>
+            {% empty %}
+                <div class="empty-state-block">
+                    <p class="eyebrow">STATUS</p>
+                    <h3>No films on reel yet</h3>
+                    <p class="panel-copy">New student thesis projects and indie short films from Cebu will be scheduled soon.</p>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 </section>
 
@@ -54,4 +114,8 @@
     <h2>Made here.<br><em>Seen here.</em></h2>
     <p>Every ticket helps an independent filmmaker keep making the next story.</p>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/reel-carousel.js' %}" defer></script>
 {% endblock %}

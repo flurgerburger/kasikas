@@ -9,23 +9,49 @@
 
     <div class="detail-layout">
         <div class="detail-main">
-            <p class="eyebrow">{{ film.institution|default:"CEBU INDEPENDENT CINEMA"|upper }}</p>
-            <h1 class="detail-title">{{ film.title }}</h1>
-            {% if film.native_title %}
-                <p class="detail-subtitle mono">{{ film.native_title }}</p>
-            {% endif %}
-            <p class="detail-director">Directed by <strong>{{ film.director }}</strong></p>
+            <div class="detail-program-banner {{ film.card_theme }}">
+                <div class="detail-program-top">
+                    <p class="eyebrow">{{ film.institution|default:"CEBU INDEPENDENT CINEMA"|upper }}</p>
+                    <span class="detail-theme-badge mono">{{ film.theme_meta.label|upper }}</span>
+                </div>
+                <h1 class="detail-title">{{ film.title }}</h1>
+                {% if film.native_title %}
+                    <p class="detail-subtitle mono">{{ film.native_title }}</p>
+                {% endif %}
+                <p class="detail-director">Directed by <strong>{{ film.director }}</strong> · {{ film.runtime_minutes }} min · {{ film.get_category_display }}</p>
+            </div>
 
             <div class="detail-block">
-                <h2 class="detail-heading">Synopsis</h2>
+                <h2 class="detail-heading">Program Synopsis</h2>
                 <div class="detail-prose">
                     {{ film.synopsis|linebreaks }}
                 </div>
             </div>
 
-            {% if film.cast_and_crew %}
+            {% if film.director_note %}
             <div class="detail-block">
-                <h2 class="detail-heading">Cast & Credits</h2>
+                <h2 class="detail-heading">Director's Note</h2>
+                <blockquote class="director-note-box">
+                    {{ film.director_note|linebreaks }}
+                </blockquote>
+            </div>
+            {% endif %}
+
+            {% if film.parsed_credits %}
+            <div class="detail-block">
+                <h2 class="detail-heading">Cast &amp; Crew</h2>
+                <div class="credits-grid">
+                    {% for credit in film.parsed_credits %}
+                        <div class="credit-row">
+                            <span class="credit-role mono">{{ credit.role }}</span>
+                            <span class="credit-names">{{ credit.names }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% elif film.cast_and_crew %}
+            <div class="detail-block">
+                <h2 class="detail-heading">Cast &amp; Crew</h2>
                 <div class="credits-box mono">
                     {{ film.cast_and_crew|linebreaks }}
                 </div>
@@ -42,6 +68,20 @@
                     <span class="price-amount">₱{{ film.ticket_price }}</span>
                     <span class="price-note mono">per pass</span>
                 </div>
+
+                {# ── JOIN DATA: from accounts_ticket via LEFT OUTER JOIN ── #}
+                <div class="booking-stats-row mono">
+                    <span class="stat-item">
+                        <span class="stat-label">PASSES SOLD</span>
+                        <span class="stat-val">{{ film.total_bookings|default:"0" }}</span>
+                    </span>
+                    <span class="stat-divider">·</span>
+                    <span class="stat-item">
+                        <span class="stat-label">SEATS RESERVED</span>
+                        <span class="stat-val">{{ film.total_seats|default:"0" }}</span>
+                    </span>
+                </div>
+                {# ──────────────────────────────────────────────────────── #}
 
                 {% if user.is_authenticated %}
                     <form method="post" action="{% url 'book_ticket' film.id %}" class="booking-form">
