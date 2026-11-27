@@ -56,3 +56,29 @@ class FilmUploadForm(forms.ModelForm):
         if not url:
             return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
         return url
+
+
+class ProfileUpdateForm(forms.Form):
+    first_name = forms.CharField(
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'First name'}),
+    )
+    last_name = forms.CharField(
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Last name'}),
+    )
+    email = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={'placeholder': 'you@example.com'}),
+    )
+    studio_name = forms.CharField(
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'e.g., Sugbo Indie Collective'}),
+    )
+    bio = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Tell the Cebuano film community about yourself...'}),
+    )

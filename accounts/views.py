@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .context_processors import get_user_role
-from .forms import FilmUploadForm
+from .forms import FilmUploadForm, ProfileUpdateForm
 from .models import Film, Ticket, UserProfile
 
 
@@ -419,4 +419,149 @@ def admin_dashboard(request):
         'top_releases': top_releases,
         'trend_series': trend_series,
         'category_counts': category_counts,
+    })
+
+
+def browse_films(request):
+    films = Film.objects.filter(status=Film.STATUS_PUBLISHED).select_related('creator', 'creator__profile')
+
+    q = request.GET.get('q', '').strip()
+    category = request.GET.get('category', '').strip()
+    institution = request.GET.get('institution', '').strip()
+    venue = request.GET.get('venue', '').strip()
+
+    if q:
+        films = films.filter(
+            Q(title__icontains=q)
+            | Q(native_title__icontains=q)
+            | Q(synopsis__icontains=q)
+            | Q(director_note__icontains=q)
+            | Q(director__icontains=q)
+            | Q(creator__username__icontains=q)
+            | Q(creator__profile__studio_name__icontains=q)
+        ).distinct()
+
+    valid_categories = dict(Film.CATEGORY_CHOICES)
+    if category in valid_categories:
+        films = films.filter(category=category)
+    else:
+        category = ''
+
+    if institution:
+        films = films.filter(institution=institution)
+
+    if venue:
+        films = films.filter(screening_venue=venue)
+
+    published_base = Film.objects.filter(status=Film.STATUS_PUBLISHED)
+    institutions = list(
+        published_base.exclude(institution='').values_list('institution', flat=True).distinct().order_by('institution')
+    )
+    venues = list(
+        published_base.exclude(screening_venue='').values_list('screening_venue', flat=True).distinct().order_by('screening_venue')
+    )
+
+    has_filters = bool(q or category or institution or venue)
+
+    return render(request, 'browse.html', {
+        'films': films,
+        'q': q,
+        'selected_category': category,
+        'selected_institution': institution,
+        'selected_venue': venue,
+        'category_choices': Film.CATEGORY_CHOICES,
+        'institutions': institutions,
+        'venues': venues,
+        'has_filters': has_filters,
+    })
+
+
+@login_required
+def profile_view(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    active_role = get_user_role(request.user, request.session)
+    is_admin = _is_admin_user(request.user)
+
+    if request.method == 'POST':
+        action = request.POST.get('action', 'update_profile')
+        if action == 'switch_role' and not is_admin:
+            target_role = (
+                UserProfile.ROLE_VIEWER
+                if active_role == UserProfile.ROLE_CREATOR
+                else UserProfile.ROLE_CREATOR
+            )
+            request.session['active_role'] = target_role
+            profile.role = target_role
+            profile.save(update_fields=['role'])
+            messages.success(request, f"Switched to {profile.get_role_display()} mode.")
+            return redirect('profile')
+
+        form = ProfileUpdateForm(request.POST)
+        if form.is_valid():
+            request.user.first_name = form.cleaned_data['first_name']
+            request.user.last_name = form.cleaned_data['last_name']
+            request.user.email = form.cleaned_data['email']
+            request.user.save(update_fields=['first_name', 'last_name', 'email'])
+
+            profile.studio_name = form.cleaned_data['studio_name']
+            profile.bio = form.cleaned_data['bio']
+            profile.save(update_fields=['studio_name', 'bio'])
+
+            messages.success(request, 'Profile details updated.')
+            return redirect('profile')
+    else:
+        form = ProfileUpdateForm(initial={
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'email': request.user.email,
+            'studio_name': profile.studio_name,
+            'bio': profile.bio,
+        })
+
+    ticket_stats = Ticket.objects.filter(user=request.user).aggregate(
+        total_passes=Count('id'),
+        total_seats=Coalesce(Sum('seats'), 0),
+    )
+    films_uploaded = (
+        request.user.created_films.count()
+        if (active_role == UserProfile.ROLE_CREATOR or profile.role == UserProfile.ROLE_CREATOR)
+        else None
+    )
+
+    return render(request, 'profile.html', {
+        'profile': profile,
+        'form': form,
+        'active_role': active_role,
+        'is_admin': is_admin,
+        'total_passes': ticket_stats['total_passes'],
+        'total_seats': ticket_stats['total_seats'],
+        'films_uploaded': films_uploaded,
+    })
+
+
+@login_required
+def edit_film(request, film_id):
+    film = get_object_or_404(Film, pk=film_id)
+    if film.creator != request.user and not _is_admin_user(request.user):
+        messages.error(request, 'You do not have permission to edit this film.')
+        return redirect('creator_dashboard')
+
+    if request.method == 'POST':
+        if request.POST.get('action') == 'delete':
+            title = film.title
+            film.delete()
+            messages.success(request, f"'{title}' has been deleted.")
+            return redirect('creator_dashboard')
+
+        form = FilmUploadForm(request.POST, request.FILES, instance=film)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Updated '{film.title}'.")
+            return redirect('creator_dashboard')
+    else:
+        form = FilmUploadForm(instance=film)
+
+    return render(request, 'edit_film.html', {
+        'form': form,
+        'film': film,
     })

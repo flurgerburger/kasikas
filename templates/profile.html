@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Profile | Kasikas{% endblock %}
+{% block content %}
+<section class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <p class="eyebrow">KASIKAS / MEMBER PROFILE</p>
+            <h1 class="dashboard-title">{{ user.username }}<br><em>account &amp; role.</em></h1>
+        </div>
+        <div class="dashboard-header-actions">
+            <a href="{% url 'my_tickets' %}" class="secondary-button">View My Passes ↗</a>
+            {% if is_creator_role or is_admin_role %}
+                <a href="{% url 'creator_dashboard' %}" class="primary-button">Open Creator Studio ↗</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="profile-layout">
+        <!-- Left Column: Identity Card & Role Switcher -->
+        <aside class="profile-sidebar">
+            <div class="panel-card profile-identity-card">
+                <div class="panel-card-header">
+                    <span class="eyebrow">IDENTITY SUMMARY</span>
+                    <span class="status-badge mono">{{ profile.get_role_display|upper }}</span>
+                </div>
+
+                <div class="identity-meta-list">
+                    <div class="identity-meta-row">
+                        <span class="mono metric-k">USERNAME</span>
+                        <strong>@{{ user.username }}</strong>
+                    </div>
+                    <div class="identity-meta-row">
+                        <span class="mono metric-k">MEMBER SINCE</span>
+                        <span class="mono">{{ user.date_joined|date:"M d, Y" }}</span>
+                    </div>
+                    {% if profile.studio_name %}
+                        <div class="identity-meta-row">
+                            <span class="mono metric-k">STUDIO / COLLECTIVE</span>
+                            <span>{{ profile.studio_name }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="profile-stats-grid mono">
+                    <div class="profile-stat-box">
+                        <span class="metric-k">PASSES BOOKED</span>
+                        <strong class="metric-v">{{ total_passes }}</strong>
+                    </div>
+                    <div class="profile-stat-box">
+                        <span class="metric-k">SEATS RESERVED</span>
+                        <strong class="metric-v">{{ total_seats }}</strong>
+                    </div>
+                    {% if films_uploaded is not None %}
+                        <div class="profile-stat-box">
+                            <span class="metric-k">FILMS UPLOADED</span>
+                            <strong class="metric-v accent-text">{{ films_uploaded }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if not is_admin %}
+                <div class="panel-card role-switcher-card">
+                    <p class="eyebrow">INSTANT ROLE SWITCHER</p>
+                    <h3>
+                        {% if active_role == 'CREATOR' %}
+                            Currently in Indie Creator Mode
+                        {% else %}
+                            Currently in Viewer Mode
+                        {% endif %}
+                    </h3>
+                    <p class="panel-copy">
+                        {% if active_role == 'CREATOR' %}
+                            Switch back to Viewer Mode anytime without signing out.
+                        {% else %}
+                            Switch to Indie Creator Mode to upload short films and manage ticket monetization.
+                        {% endif %}
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="switch_role">
+                        <button type="submit" class="primary-button full-width">
+                            {% if active_role == 'CREATOR' %}
+                                Switch to Viewer Mode ⇄
+                            {% else %}
+                                Switch to Indie Creator Mode ⇄
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </aside>
+
+        <!-- Right Column: Edit Profile Form -->
+        <div class="panel-card">
+            <div class="panel-card-header">
+                <span class="eyebrow">EDIT PROFILE</span>
+                <span class="mono panel-meta">PERSONAL &amp; STUDIO DETAILS</span>
+            </div>
+
+            <form method="post" class="profile-edit-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_profile">
+
+                <div class="form-grid-two">
+                    <div class="form-field">
+                        <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<div class="field-error">{{ form.first_name.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="form-field">
+                        <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<div class="field-error">{{ form.last_name.errors|striptags }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-grid-two">
+                    <div class="form-field">
+                        <label for="{{ form.email.id_for_label }}">Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="field-error">{{ form.email.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="form-field">
+                        <label for="{{ form.studio_name.id_for_label }}">Studio / Collective Name</label>
+                        {{ form.studio_name }}
+                        {% if form.studio_name.errors %}<div class="field-error">{{ form.studio_name.errors|striptags }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.bio.id_for_label }}">Bio / Filmmaker Statement</label>
+                    {{ form.bio }}
+                    {% if form.bio.errors %}<div class="field-error">{{ form.bio.errors|striptags }}</div>{% endif %}
+                </div>
+
+                <div class="upload-submit-row">
+                    <button type="submit" class="primary-button">Save Profile Changes <span>↗</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
