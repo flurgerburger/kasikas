@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Browse Catalog | Kasikas{% endblock %}
+{% block content %}
+<section class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <p class="eyebrow">KASIKAS / FULL CATALOG</p>
+            <h1 class="dashboard-title">Browse<br><em>local cinema.</em></h1>
+        </div>
+        <div class="dashboard-header-actions">
+            <span class="mono catalog-count-badge">{{ films|length }} film{{ films|length|pluralize }} found</span>
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <form method="get" action="{% url 'browse' %}" class="browse-filter-panel">
+        <div class="browse-search-row">
+            <input
+                type="search"
+                name="q"
+                value="{{ q }}"
+                class="browse-search-input"
+                placeholder="Search by title, Cebuano title, director, synopsis, or studio..."
+                aria-label="Search films"
+            >
+            <button type="submit" class="primary-button">Search <span>↗</span></button>
+            {% if has_filters %}
+                <a href="{% url 'browse' %}" class="secondary-button">Clear Filters ✕</a>
+            {% endif %}
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="filter-pills-row" aria-label="Filter by category">
+            <span class="mono filter-group-label">CATEGORY</span>
+            <a
+                href="{% url 'browse' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if selected_institution %}institution={{ selected_institution|urlencode }}&{% endif %}{% if selected_venue %}venue={{ selected_venue|urlencode }}{% endif %}"
+                class="filter-pill mono {% if not selected_category %}is-active{% endif %}"
+            >All</a>
+            {% for code, label in category_choices %}
+                <a
+                    href="{% url 'browse' %}?category={{ code }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_institution %}&institution={{ selected_institution|urlencode }}{% endif %}{% if selected_venue %}&venue={{ selected_venue|urlencode }}{% endif %}"
+                    class="filter-pill mono {% if selected_category == code %}is-active{% endif %}"
+                >{{ label }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- Institution & Venue Dropdowns -->
+        <div class="browse-select-row">
+            {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category }}">
+            {% endif %}
+            <div class="form-field">
+                <label for="filter-institution">Institution / Collective</label>
+                <select id="filter-institution" name="institution" onchange="this.form.submit()">
+                    <option value="">All Institutions</option>
+                    {% for inst in institutions %}
+                        <option value="{{ inst }}" {% if selected_institution == inst %}selected{% endif %}>{{ inst }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="filter-venue">Screening Venue</label>
+                <select id="filter-venue" name="venue" onchange="this.form.submit()">
+                    <option value="">All Screening Venues</option>
+                    {% for v in venues %}
+                        <option value="{{ v }}" {% if selected_venue == v %}selected{% endif %}>{{ v }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <!-- Results Grid -->
+    <div class="film-grid">
+        {% for film in films %}
+            <a href="{% url 'film_detail' film.id %}" class="film-card {{ film.card_theme }}" aria-label="View {{ film.title }}">
+                <div class="film-number">0{{ forloop.counter }}</div>
+                <div class="film-meta">{{ film.category_meta }}</div>
+                <h3>{{ film.title }}</h3>
+                <p>{{ film.logline }}</p>
+                <span class="card-arrow" aria-hidden="true">↗</span>
+            </a>
+        {% empty %}
+            <div class="empty-state-block">
+                <p class="eyebrow">NO MATCHES</p>
+                <h3>No films match your current filters</h3>
+                <p class="panel-copy">Try clearing your search query or switching category, institution, or venue filters.</p>
+                {% if has_filters %}
+                    <div style="margin-top: 20px;">
+                        <a href="{% url 'browse' %}" class="primary-button inline-button">Clear Filters</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
