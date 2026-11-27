@@ -296,3 +296,146 @@ class ReelCarouselAndCatalogTests(TestCase):
         self.assertContains(detail_resp, 'Cast &amp; Crew')
         self.assertContains(detail_resp, 'NEON CYBERPUNK')
         self.assertContains(detail_resp, 'Kenji Velasco')
+
+
+class ProfileEditAndBrowseTests(TestCase):
+    def setUp(self):
+        self.viewer = User.objects.create_user(username='profile_viewer', password='Password123!')
+        UserProfile.objects.create(user=self.viewer, role=UserProfile.ROLE_VIEWER)
+
+        self.creator = User.objects.create_user(username='profile_creator', password='Password123!')
+        UserProfile.objects.create(
+            user=self.creator,
+            role=UserProfile.ROLE_CREATOR,
+            studio_name='Sugbo Indie Collective',
+        )
+
+        self.other_creator = User.objects.create_user(username='other_creator', password='Password123!')
+        UserProfile.objects.create(user=self.other_creator, role=UserProfile.ROLE_CREATOR)
+
+        self.film1 = Film.objects.create(
+            creator=self.creator,
+            title='Dagat sa Kabuntagon',
+            native_title='Sea at Dawn',
+            director='Bea Carillo',
+            institution='UP Cebu',
+            category='SHORT',
+            runtime_minutes=14,
+            logline='Fishermen at dawn.',
+            synopsis='A quiet look at Cebu coastal fishermen.',
+            director_note='Shot on location in Cordova.',
+            screening_venue='Cinema Sugbo, Cebu City',
+            ticket_price=150.00,
+            status=Film.STATUS_PUBLISHED,
+        )
+        self.film2 = Film.objects.create(
+            creator=self.creator,
+            title='Bukid Chronicles',
+            director='Kyle Navarro',
+            institution='USC Talamban',
+            category='DOCU',
+            runtime_minutes=25,
+            logline='Mountain barangay life.',
+            synopsis='Documentary on highland farmers.',
+            screening_venue='UP Cebu Performing Arts Hall',
+            ticket_price=120.00,
+            status=Film.STATUS_PUBLISHED,
+        )
+        Ticket.objects.create(user=self.viewer, film=self.film1, seats=3)
+
+    def test_profile_page_displays_identity_stats_and_updates_fields(self):
+        self.client.login(username='profile_viewer', password='Password123!')
+        resp = self.client.get(reverse('profile'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, '@profile_viewer')
+        self.assertContains(resp, '3')
+        self.assertContains(resp, 'Switch to Indie Creator Mode')
+
+        # Update profile details
+        post_resp = self.client.post(reverse('profile'), {
+            'action': 'update_profile',
+            'first_name': 'Maria',
+            'last_name': 'Santos',
+            'email': 'maria@kasikas.ph',
+            'studio_name': 'Sugbo Indie Collective',
+            'bio': 'Cebuano filmmaker and cinephile.',
+        })
+        self.assertRedirects(post_resp, reverse('profile'))
+        self.viewer.refresh_from_db()
+        self.assertEqual(self.viewer.first_name, 'Maria')
+        self.assertEqual(self.viewer.email, 'maria@kasikas.ph')
+        self.assertEqual(self.viewer.profile.studio_name, 'Sugbo Indie Collective')
+
+    def test_profile_instant_role_switcher_toggles_viewer_and_creator(self):
+        self.client.login(username='profile_viewer', password='Password123!')
+        resp = self.client.post(reverse('profile'), {'action': 'switch_role'})
+        self.assertRedirects(resp, reverse('profile'))
+        self.viewer.refresh_from_db()
+        self.assertEqual(self.viewer.profile.role, UserProfile.ROLE_CREATOR)
+        self.assertEqual(self.client.session.get('active_role'), UserProfile.ROLE_CREATOR)
+
+        # Toggle back to Viewer
+        resp2 = self.client.post(reverse('profile'), {'action': 'switch_role'})
+        self.assertRedirects(resp2, reverse('profile'))
+        self.viewer.refresh_from_db()
+        self.assertEqual(self.viewer.profile.role, UserProfile.ROLE_VIEWER)
+        self.assertEqual(self.client.session.get('active_role'), UserProfile.ROLE_VIEWER)
+
+    def test_edit_and_delete_film_permissions_and_crud(self):
+        # Other creator cannot edit
+        self.client.login(username='other_creator', password='Password123!')
+        forbidden_resp = self.client.get(reverse('edit_film', args=[self.film1.id]))
+        self.assertRedirects(forbidden_resp, reverse('creator_dashboard'))
+
+        # Owner creator can edit
+        self.client.login(username='profile_creator', password='Password123!')
+        edit_get = self.client.get(reverse('edit_film', args=[self.film1.id]))
+        self.assertEqual(edit_get.status_code, 200)
+        self.assertContains(edit_get, 'Dagat sa Kabuntagon')
+
+        edit_post = self.client.post(reverse('edit_film', args=[self.film1.id]), {
+            'title': 'Dagat sa Kabuntagon (Director Cut)',
+            'director': 'Bea Carillo',
+            'category': 'SHORT',
+            'runtime_minutes': 16,
+            'logline': 'Updated logline.',
+            'synopsis': 'Updated synopsis.',
+            'director_note': 'Updated festival note.',
+            'card_theme': 'theme-gold',
+            'screening_venue': 'Cinema Sugbo, Cebu City',
+            'screening_time': 'Saturday, 8:00 PM',
+            'ticket_price': '175.00',
+            'status': Film.STATUS_PUBLISHED,
+        })
+        self.assertRedirects(edit_post, reverse('creator_dashboard'))
+        self.film1.refresh_from_db()
+        self.assertEqual(self.film1.title, 'Dagat sa Kabuntagon (Director Cut)')
+        self.assertEqual(self.film1.director_note, 'Updated festival note.')
+        self.assertEqual(self.film1.ticket_price, 175)
+
+        # Owner creator can delete
+        del_post = self.client.post(reverse('edit_film', args=[self.film1.id]), {'action': 'delete'})
+        self.assertRedirects(del_post, reverse('creator_dashboard'))
+        self.assertFalse(Film.objects.filter(pk=self.film1.id).exists())
+
+    def test_browse_search_and_filters(self):
+        # Search by studio name / title
+        resp_q = self.client.get(reverse('browse'), {'q': 'Cordova'})
+        self.assertEqual(resp_q.status_code, 200)
+        self.assertContains(resp_q, 'Dagat sa Kabuntagon')
+        self.assertNotContains(resp_q, 'Bukid Chronicles')
+
+        # Filter by category
+        resp_cat = self.client.get(reverse('browse'), {'category': 'DOCU'})
+        self.assertContains(resp_cat, 'Bukid Chronicles')
+        self.assertNotContains(resp_cat, 'Dagat sa Kabuntagon')
+
+        # Filter by institution
+        resp_inst = self.client.get(reverse('browse'), {'institution': 'UP Cebu'})
+        self.assertContains(resp_inst, 'Dagat sa Kabuntagon')
+        self.assertNotContains(resp_inst, 'Bukid Chronicles')
+
+        # Filter by venue
+        resp_venue = self.client.get(reverse('browse'), {'venue': 'UP Cebu Performing Arts Hall'})
+        self.assertContains(resp_venue, 'Bukid Chronicles')
+        self.assertNotContains(resp_venue, 'Dagat sa Kabuntagon')
