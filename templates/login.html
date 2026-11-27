@@ -11,10 +11,32 @@
     <div class="auth-panel">
         <p class="eyebrow">WELCOME BACK</p>
         <h2>Sign in to Kasikas</h2>
-        <p class="panel-copy">Pick up where you left off and discover what is screening next.</p>
+        <p class="panel-copy">Choose how you’re entering today, then pick up where you left off.</p>
         <form method="post" class="auth-form">
             {% csrf_token %}
+            {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
             {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+
+            <div class="role-selector-block" role="radiogroup" aria-label="Select your role">
+                <span class="role-selector-label mono">SIGN IN AS</span>
+                <div class="role-options">
+                    <label class="role-option">
+                        <input type="radio" name="role" value="VIEWER" {% if selected_role != 'CREATOR' %}checked{% endif %}>
+                        <span class="role-card">
+                            <strong class="role-title">Viewer</strong>
+                            <span class="role-desc">Discover films &amp; book passes</span>
+                        </span>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="role" value="CREATOR" {% if selected_role == 'CREATOR' %}checked{% endif %}>
+                        <span class="role-card">
+                            <strong class="role-title">Indie Creator</strong>
+                            <span class="role-desc">Upload shorts &amp; track earnings</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
             <label for="id_username">Username</label>
             <input id="id_username" name="username" type="text" autocomplete="username" required autofocus>
             {% if form.username.errors %}<div class="field-error">{{ form.username.errors|striptags }}</div>{% endif %}
@@ -35,7 +57,15 @@
             {% if form.password.errors %}<div class="field-error">{{ form.password.errors|striptags }}</div>{% endif %}
             <button class="primary-button" type="submit">Enter Kasikas <span>↗</span></button>
         </form>
+
+        <div class="demo-creds-box mono">
+            <span class="demo-creds-title">DEMO ACCOUNTS</span>
+            <div>Viewer: <strong>cebu_viewer</strong> / <strong>ViewerPass123!</strong></div>
+            <div>Creator: <strong>bea_creator</strong> / <strong>CreatorPass123!</strong></div>
+        </div>
+
         <p class="form-footer">New to the community? <a href="{% url 'register' %}">Create an account</a></p>
+        <p class="form-footer admin-portal-link">Platform administrator? <a href="{% url 'admin_login' %}">Admin sign in →</a></p>
     </div>
 </section>
 {% endblock %}

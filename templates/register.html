@@ -11,10 +11,31 @@
     <div class="auth-panel">
         <p class="eyebrow">FIRST, A HELLO</p>
         <h2>Create your account</h2>
-        <p class="panel-copy">Save films, follow screenings, and be part of the local picture.</p>
+        <p class="panel-copy">Select whether you’re joining as a Viewer or an Indie Creator.</p>
         <form method="post" class="auth-form">
             {% csrf_token %}
             {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+
+            <div class="role-selector-block" role="radiogroup" aria-label="Select your role">
+                <span class="role-selector-label mono">JOINING AS</span>
+                <div class="role-options">
+                    <label class="role-option">
+                        <input type="radio" name="role" value="VIEWER" {% if selected_role != 'CREATOR' %}checked{% endif %}>
+                        <span class="role-card">
+                            <strong class="role-title">Viewer</strong>
+                            <span class="role-desc">Watch &amp; reserve cinema passes</span>
+                        </span>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="role" value="CREATOR" {% if selected_role == 'CREATOR' %}checked{% endif %}>
+                        <span class="role-card">
+                            <strong class="role-title">Indie Creator</strong>
+                            <span class="role-desc">Release films &amp; earn from tickets</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
             <label for="id_username">Choose a username</label>
             <input id="id_username" name="username" type="text" autocomplete="username" required autofocus>
             {% if form.username.errors %}<div class="field-error">{{ form.username.errors|striptags }}</div>{% endif %}
