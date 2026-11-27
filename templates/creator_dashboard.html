@@ -148,6 +148,7 @@
                             <div class="release-actions">
                                 <a href="{% url 'film_detail' film.id %}" class="mini-link mono">Details ↗</a>
                                 <a href="{% url 'watch_film' film.id %}" class="mini-link mono">Stream ▶</a>
+                                <a href="{% url 'edit_film' film.id %}" class="mini-link mono">Edit ✎</a>
                                 <form method="post" action="{% url 'toggle_film_status' film.id %}" class="inline-form">
                                     {% csrf_token %}
                                     <button type="submit" class="mini-btn mono">
